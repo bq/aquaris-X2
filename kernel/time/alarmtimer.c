@@ -844,13 +844,6 @@ static int alarm_timer_set(struct k_itimer *timr, int flags,
 	/* start the timer */
 	timr->it.alarm.interval = timespec_to_ktime(new_setting->it_interval);
 
-	/*
-	 * Rate limit to the tick as a hot fix to prevent DOS. Will be
-	 * mopped up later.
-	 */
-	if (ktime_to_ns(timr->it.alarm.interval) < TICK_NSEC)
-		timr->it.alarm.interval = ktime_set(0, TICK_NSEC);
-
 	exp = timespec_to_ktime(new_setting->it_value);
 	/* Convert (if necessary) to absolute time */
 	if (flags != TIMER_ABSTIME) {
@@ -1025,7 +1018,7 @@ static int alarm_timer_nsleep(const clockid_t which_clock, int flags,
 			goto out;
 	}
 
-	restart = &current->restart_block;
+	restart = &current_thread_info()->restart_block;
 	restart->fn = alarm_timer_nsleep_restart;
 	restart->nanosleep.clockid = type;
 	restart->nanosleep.expires = exp.tv64;

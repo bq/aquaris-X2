@@ -1718,6 +1718,7 @@ static int qpnp_rgb_set(struct qpnp_led_data *led)
 			led->rgb_cfg->pwm_cfg->mode =
 				led->rgb_cfg->pwm_cfg->default_mode;
 		if (led->rgb_cfg->pwm_cfg->mode == PWM_MODE) {
+
 			rc = pwm_change_mode(led->rgb_cfg->pwm_cfg->pwm_dev,
 					PM_PWM_MODE_PWM);
 			if (rc < 0) {
@@ -1725,7 +1726,8 @@ static int qpnp_rgb_set(struct qpnp_led_data *led)
 					"Failed to set PWM mode, rc = %d\n",
 					rc);
 				return rc;
-			}
+			};
+
 			period_us = led->rgb_cfg->pwm_cfg->pwm_period_us;
 			if (period_us > INT_MAX / NSEC_PER_USEC) {
 				duty_us = (period_us * led->cdev.brightness) /

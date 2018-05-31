@@ -28,6 +28,8 @@
 #include "smb-lib.h"
 #include "storm-watch.h"
 #include <linux/pmic-voter.h>
+#include <linux/gpio.h>
+#include <linux/of_gpio.h>
 
 #define SMB2_DEFAULT_WPWR_UW	8000000
 
@@ -928,6 +930,7 @@ static enum power_supply_property smb2_batt_props[] = {
 	POWER_SUPPLY_PROP_RERUN_AICL,
 	POWER_SUPPLY_PROP_DP_DM,
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+	POWER_SUPPLY_PROP_CHARGING_ENABLED,
 };
 
 static int smb2_batt_get_prop(struct power_supply *psy,
@@ -939,6 +942,11 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 	union power_supply_propval pval = {0, };
 
 	switch (psp) {
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
+		smblib_get_prop_batt_status(chg, val);
+		if (val->intval != POWER_SUPPLY_STATUS_CHARGING)
+			val->intval = 0;
+		break;
 	case POWER_SUPPLY_PROP_STATUS:
 		rc = smblib_get_prop_batt_status(chg, val);
 		break;
@@ -1057,6 +1065,9 @@ static int smb2_batt_set_prop(struct power_supply *psy,
 	struct smb_charger *chg = power_supply_get_drvdata(psy);
 
 	switch (prop) {
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
+		rc = lct_set_prop_input_suspend(chg, val);
+		break;
 	case POWER_SUPPLY_PROP_INPUT_SUSPEND:
 		rc = smblib_set_prop_input_suspend(chg, val);
 		break;
@@ -1150,6 +1161,7 @@ static int smb2_batt_prop_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMITED:
 	case POWER_SUPPLY_PROP_STEP_CHARGING_ENABLED:
 	case POWER_SUPPLY_PROP_SW_JEITA_ENABLED:
+	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
 		return 1;
 	default:
 		break;
@@ -2212,6 +2224,15 @@ static void smb2_create_debugfs(struct smb2 *chip)
 
 #endif
 
+void set_charging_protect(void)
+{
+	int value=0,gpio45=45;
+	value = gpio_get_value(gpio45);
+	printk("gpio45 default value is %d\n",value);
+	gpio_set_value(gpio45,0);
+	printk("gpio45 set to output low\n");
+}
+
 static int smb2_probe(struct platform_device *pdev)
 {
 	struct smb2 *chip;
@@ -2377,6 +2398,8 @@ static int smb2_probe(struct platform_device *pdev)
 	batt_charge_type = val.intval;
 
 	device_init_wakeup(chg->dev, true);
+
+	set_charging_protect();
 
 	pr_info("QPNP SMB2 probed successfully usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
 		usb_present, chg->real_charger_type,

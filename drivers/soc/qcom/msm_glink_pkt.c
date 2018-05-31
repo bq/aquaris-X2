@@ -936,7 +936,7 @@ static long glink_pkt_ioctl(struct file *file, unsigned int cmd,
 	case GLINK_PKT_IOCTL_QUEUE_RX_INTENT:
 		ret = get_user(size, (uint32_t *)arg);
 		GLINK_PKT_INFO("%s: intent size[%d]\n", __func__, size);
-		devp->auto_intent_enabled = false;
+		devp->auto_intent_enabled = true;
 		ret  = glink_queue_rx_intent(devp->handle, devp, size);
 		if (ret) {
 			GLINK_PKT_ERR("%s: failed to QUEUE_RX_INTENT ret[%d]\n",

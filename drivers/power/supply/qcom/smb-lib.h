@@ -252,6 +252,9 @@ struct smb_charger {
 	struct power_supply_desc	usb_psy_desc;
 	struct power_supply		*usb_main_psy;
 	struct power_supply		*usb_port_psy;
+
+	struct power_supply             *pl_psy;
+	
 	enum power_supply_type		real_charger_type;
 
 	/* notifiers */
@@ -311,6 +314,9 @@ struct smb_charger {
 	int			dcp_icl_ua;
 	int			fake_capacity;
 	bool			step_chg_enabled;
+
+	int			charging_enabled;
+	
 	bool			sw_jeita_enabled;
 	bool			is_hdc;
 	bool			chg_done;
@@ -430,6 +436,10 @@ int smblib_get_prop_batt_charge_counter(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_set_prop_input_suspend(struct smb_charger *chg,
 				const union power_supply_propval *val);
+
+int lct_set_prop_input_suspend(struct smb_charger *chg,
+				const union power_supply_propval *val);
+
 int smblib_set_prop_batt_capacity(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_set_prop_system_temp_level(struct smb_charger *chg,

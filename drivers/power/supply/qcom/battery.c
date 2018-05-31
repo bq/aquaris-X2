@@ -1032,7 +1032,7 @@ int qcom_batt_init(void)
 	chip = kzalloc(sizeof(*chip), GFP_KERNEL);
 	if (!chip)
 		return -ENOMEM;
-	chip->slave_pct = 50;
+	chip->slave_pct = 70;
 	chip->restricted_current = DEFAULT_RESTRICTED_CURRENT_UA;
 
 	chip->pl_ws = wakeup_source_register("qcom-battery");

@@ -324,7 +324,7 @@
 				qcom,max-current = <750>;
 				qcom,default-led-trigger = "flash2_trigger";
 				qcom,id = <2>;
-				qcom,current-ma = <500>;
+				qcom,current-ma = <250>;
 				qcom,duration-ms = <1280>;
 				qcom,ires-ua = <12500>;
 				qcom,hdrm-voltage-mv = <325>;
@@ -337,7 +337,7 @@
 				qcom,max-current = <500>;
 				qcom,default-led-trigger = "torch0_trigger";
 				qcom,id = <0>;
-				qcom,current-ma = <300>;
+				qcom,current-ma = <200>;
 				qcom,ires-ua = <12500>;
 				qcom,hdrm-voltage-mv = <325>;
 				qcom,hdrm-vol-hi-lo-win-mv = <100>;
@@ -349,7 +349,7 @@
 				qcom,max-current = <500>;
 				qcom,default-led-trigger = "torch1_trigger";
 				qcom,id = <1>;
-				qcom,current-ma = <300>;
+				qcom,current-ma = <200>;
 				qcom,ires-ua = <12500>;
 				qcom,hdrm-voltage-mv = <325>;
 				qcom,hdrm-vol-hi-lo-win-mv = <100>;
@@ -361,7 +361,7 @@
 				qcom,max-current = <500>;
 				qcom,default-led-trigger = "torch2_trigger";
 				qcom,id = <2>;
-				qcom,current-ma = <300>;
+				qcom,current-ma = <200>;
 				qcom,ires-ua = <12500>;
 				qcom,hdrm-voltage-mv = <325>;
 				qcom,hdrm-vol-hi-lo-win-mv = <100>;

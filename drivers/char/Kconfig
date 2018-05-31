@@ -3,7 +3,7 @@
 #
 
 menu "Character devices"
-
+source  "drivers/char/i2c_devinfo/Kconfig"
 source "drivers/tty/Kconfig"
 
 config DEVMEM

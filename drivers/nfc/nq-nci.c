@@ -43,6 +43,8 @@ static const struct of_device_id msm_match_table[] = {
 	{}
 };
 
+extern int i2c_devinfo_device_write(char* buf);
+
 MODULE_DEVICE_TABLE(of, msm_match_table);
 
 #define MAX_BUFFER_SIZE			(320)
@@ -462,7 +464,7 @@ int nfc_ioctl_power_states(struct file *filp, unsigned long arg)
 		 * interrupts to avoid spurious notifications to upper
 		 * layers.
 		 */
-		nqx_disable_irq(nqx_dev);
+
 		dev_dbg(&nqx_dev->client->dev,
 			"gpio_set_value disable: %s: info: %p\n",
 			__func__, nqx_dev);
@@ -1057,12 +1059,6 @@ static int nqx_probe(struct i2c_client *client,
 	 *
 	 */
 	r = nfcc_hw_check(client, nqx_dev);
-	if (r) {
-		/* make sure NFCC is not enabled */
-		gpio_set_value(platform_data->en_gpio, 0);
-		/* We don't think there is hardware switch NFC OFF */
-		goto err_request_hw_check_failed;
-	}
 
 	/* Register reboot notifier here */
 	r = register_reboot_notifier(&nfcc_notifier);
@@ -1091,6 +1087,7 @@ static int nqx_probe(struct i2c_client *client,
 	i2c_set_clientdata(client, nqx_dev);
 	nqx_dev->irq_wake_up = false;
 
+	i2c_devinfo_device_write("NFC:1;");
 	dev_err(&client->dev,
 	"%s: probing NFCC NQxxx exited successfully\n",
 		 __func__);
@@ -1126,6 +1123,7 @@ err_free_data:
 	if (client->dev.of_node)
 		devm_kfree(&client->dev, platform_data);
 err_platform_data:
+	i2c_devinfo_device_write("NFC:0;");
 	dev_err(&client->dev,
 	"%s: probing nqxx failed, check hardware\n",
 		 __func__);
