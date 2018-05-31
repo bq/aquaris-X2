@@ -56,7 +56,7 @@
 #define NUM_PARAMS_REG_ENABLE_SET 2
 #define PROC_NAME  "fp_info"
 
-#define tyt_debug printk("tyt %s:%d\n",__func__,__LINE__) 
+#define tyt_debug printk("tyt %s:%d\n",__func__,__LINE__)
 static struct proc_dir_entry *proc_entry;
 extern int fpsensor;
 
@@ -92,7 +92,7 @@ struct fpc1020_data {
 	struct mutex lock; /* To set/get exported values in sysfs */
 	bool prepared;
 	atomic_t wakeup_enabled; /* Used both in ISR and non-ISR */
-	
+
 	struct notifier_block fb_notifier;
 	bool fb_black;
 	bool wait_finger_down;
@@ -193,9 +193,11 @@ static ssize_t fingerdown_wait_set(struct device *dev,
 	tyt_debug;
 	dev_dbg(fpc1020->dev, "%s\n", __func__);
 	if (!strncmp(buf, "enable", strlen("enable"))){
+		printk("wait_finger_down enable\n");
 		fpc1020->wait_finger_down = true;
 	}
 	else if (!strncmp(buf, "disable", strlen("disable"))){
+		printk("wait_finger_down disable\n");
 		fpc1020->wait_finger_down = false;
 	}
 	else
@@ -493,6 +495,7 @@ static const struct attribute_group attribute_group = {
 static void notification_work(struct work_struct *work)
 {
 	mdss_prim_panel_fb_unblank(FP_UNLOCK_REJECTION_TIMEOUT);
+	printk("unblank\n");
 }
 static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 {
@@ -508,9 +511,10 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 
 	sysfs_notify(&fpc1020->dev->kobj, NULL, dev_attr_irq.attr.name);
        	if (fpc1020->wait_finger_down && fpc1020->fb_black) {
+		printk("%s enter\n", __func__);
 		fpc1020->wait_finger_down = false;
 		schedule_work(&fpc1020->work);
-	} 
+	}
 	return IRQ_HANDLED;
 }
 

@@ -933,8 +933,10 @@ int32_t msm_sensor_driver_probe(void *setting,
 			|| ((strcmp(slave_info->sensor_name,"imx350_ofilm_zangyapro") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
 			|| ((strcmp(slave_info->sensor_name,"s5k4h7yx_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
 			|| ((strcmp(slave_info->sensor_name,"s5k4h7yx_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH))
-			|| ((strcmp(slave_info->sensor_name,"s5k2l8_ofilm_zangya") == 0))
-			|| ((strcmp(slave_info->sensor_name,"s5k5e8_ofilm_zangya") == 0))
+			|| ((strcmp(slave_info->sensor_name,"s5k2l8_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
+			|| ((strcmp(slave_info->sensor_name,"s5k5e8_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
+			|| ((strcmp(slave_info->sensor_name,"s5k2l8_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH1))
+			|| ((strcmp(slave_info->sensor_name,"s5k5e8_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH1))
 			){
 				pr_err("module found!probe continue!eeprom_name=%s\n", slave_info->eeprom_name);
 				break;
@@ -958,10 +960,10 @@ int32_t msm_sensor_driver_probe(void *setting,
 #endif
 
 #ifdef CONFIG_ZANGYA_CAMERA
-  if(strcmp(slave_info->sensor_name,"s5k2l8_ofilm_zangya") == 0){ /*Must last back-camera config in camera_config.xml*/
+  if(strcmp(slave_info->sensor_name,"s5k2l8_holitech_zangya") == 0){ /*Must last back-camera config in camera_config.xml*/
       i2c_devinfo_device_write("Bcam:0;");
   }
-  if(strcmp(slave_info->sensor_name,"s5k5e8_ofilm_zangya") == 0){ /*Must last back-camera config in camera_config.xml*/
+  if(strcmp(slave_info->sensor_name,"s5k5e8_holitech_zangya") == 0){ /*Must last back-camera config in camera_config.xml*/
       i2c_devinfo_device_write("Bcam2:0;");
   }
   if(strcmp(slave_info->sensor_name,"s5k4h7yx_holitech_zangya") == 0){ /*Must last front-camera config in camera_config.xml*/

@@ -52,8 +52,10 @@
 	qcom,fv-max-uv = <4400000>;
 	qcom,auto-recharge-soc;
 	qcom,autoadjust-vfloat;
-	qcom,thermal-mitigation = <2200000 2100000 1800000 1400000 1200000 800000 0>;
+	qcom,thermal-mitigation = <2200000 2100000 1800000 1400000 1000000 600000 0>;
 	qcom,float-option = <1>;
+	qcom,usb_therm-vadc = <&pm660_vadc>;
+	qcom,protect-temp-by-d-work;
 };
 
 &pm660_fg {
@@ -67,6 +69,20 @@
 	qcom,hold-soc-while-full;
 	qcom,linearize-soc;
 };
+
+&pm660_vadc{
+	chan@50 {
+		label = "usb_therm";
+		reg = <0x50>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+		qcom,vadc-thermal-node;
+	};
+ };
 
 &spmi_bus {
 	qcom,pm660@0 {
@@ -95,7 +111,7 @@
 			};
 
 			green_led: qcom,rgb_1 {
-				qcom,start-idx = <0>;
+				qcom,start-idx = <7>;
 				qcom,idx-len = <6>;
 				qcom,duty-pcts =
 				[00 00 00 64 64 64];
@@ -103,7 +119,7 @@
 			};
 
 			blue_led: qcom,rgb_2 {
-				qcom,start-idx = <0>;
+				qcom,start-idx = <13>;
 				qcom,idx-len = <6>;
 				qcom,duty-pcts =
 				[00 00 00 64 64 64];
@@ -223,7 +239,7 @@
 
 &pm660l_wled {
 	qcom,led-strings-list = [00 01 02];
-	qcom,fs-curr-ua = <21000>;
+	qcom,fs-curr-ua = <25000>;
 };
 
 &int_codec {
@@ -442,6 +458,10 @@
         qcom,eeprom-src = <&eeprom3 &eeprom4>;
         qcom,led-flash-src = <&led_flash1>;
         /delete-property/ qcom,actuator-src;
+    };
+
+    tof0: qcom,tof@29{
+	/delete-property/ stm,irq-gpio;
     };
 };
 
@@ -664,4 +684,19 @@
 	/delete-property/ qcom,lra-high-z;
 	/delete-property/ qcom,lra-auto-res-mode;
 	/delete-property/ qcom,correct-lra-drive-freq;
+};
+
+&red_led {
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
+};
+
+&green_led {
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
+};
+
+&blue_led {
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
 };

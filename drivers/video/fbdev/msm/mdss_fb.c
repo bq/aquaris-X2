@@ -105,9 +105,11 @@ static int mdss_fb_pan_display(struct fb_var_screeninfo *var,
 static int mdss_fb_check_var(struct fb_var_screeninfo *var,
 			     struct fb_info *info);
 static int mdss_fb_set_par(struct fb_info *info);
+static int mdss_fb_blank(int blank_mode, struct fb_info *info);
 static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
 			     int op_enable);
 static int mdss_fb_suspend_sub(struct msm_fb_data_type *mfd);
+static int mdss_fb_resume_sub(struct msm_fb_data_type *mfd);
 static int mdss_fb_ioctl(struct fb_info *info, unsigned int cmd,
 			 unsigned long arg, struct file *file);
 static int mdss_fb_fbmem_ion_mmap(struct fb_info *info,
@@ -944,6 +946,36 @@ static ssize_t mdss_fb_idle_pc_notify(struct device *dev,
 	return scnprintf(buf, PAGE_SIZE, "idle power collapsed\n");
 }
 
+static ssize_t mdss_fb_set_suspend(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	struct fb_info *fbi = dev_get_drvdata(dev);
+	u32 suspend = 0;
+	if (!fbi)
+		return len;
+
+	if(kstrtouint(buf, 0, &suspend)) {
+		pr_err("kstrtouint buf error!\n");
+		return len;
+	}
+
+        if (suspend) {
+		printk(KERN_DEBUG "Enter display suspend");
+		mdss_fb_blank(FB_BLANK_VSYNC_SUSPEND, fbi);
+	} else {
+		printk(KERN_DEBUG "Enter display resume");
+		mdss_fb_blank(FB_BLANK_UNBLANK, fbi);
+	}
+
+	return len;
+}
+
+static ssize_t mdss_fb_get_suspend(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "Not supported\n");
+}
+
 static DEVICE_ATTR(msm_fb_type, S_IRUGO, mdss_fb_get_type, NULL);
 static DEVICE_ATTR(msm_fb_split, S_IRUGO | S_IWUSR, mdss_fb_show_split,
 					mdss_fb_store_split);
@@ -965,6 +997,8 @@ static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
 static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
 static DEVICE_ATTR(idle_power_collapse, S_IRUGO, mdss_fb_idle_pc_notify, NULL);
+static DEVICE_ATTR(suspend, S_IRUGO | S_IWUSR,
+	mdss_fb_get_suspend, mdss_fb_set_suspend);
 
 static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_type.attr,
@@ -980,6 +1014,7 @@ static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_measured_fps.attr,
 	&dev_attr_msm_fb_persist_mode.attr,
 	&dev_attr_idle_power_collapse.attr,
+        &dev_attr_suspend.attr,
 	NULL,
 };
 
@@ -1775,7 +1810,7 @@ void mdss_fb_set_backlight(struct msm_fb_data_type *mfd, u32 bkl_lvl)
 	u32 temp = bkl_lvl;
 	bool ad_bl_notify_needed = false;
 	bool bl_notify_needed = false;
-
+	printk("011 set baclight\n");
 	if ((((mdss_fb_is_power_off(mfd) && mfd->dcm_state != DCM_ENTER)
 		|| !mfd->allow_bl_update) && !IS_CALIB_MODE_BL(mfd)) ||
 		mfd->panel_info->cont_splash_enabled) {
@@ -2155,7 +2190,7 @@ static int mdss_fb_blank(int blank_mode, struct fb_info *info)
 	int ret;
 	struct mdss_panel_data *pdata;
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
-
+	printk("mdss_fb_blank 111\n");
 	if ((info == prim_fbi) && (blank_mode == FB_BLANK_UNBLANK) &&
 		atomic_read(&prim_panel_is_on)) {
 		atomic_set(&prim_panel_is_on, false);
@@ -2839,7 +2874,7 @@ static int mdss_fb_register(struct msm_fb_data_type *mfd)
 		INIT_DELAYED_WORK(&prim_panel_work, prim_panel_off_delayed_work);
 		wake_lock_init(&prim_panel_wakelock, WAKE_LOCK_SUSPEND, "prim_panel_wakelock");
 	}
- 
+
 	return 0;
 }
 
@@ -5346,14 +5381,15 @@ void mdss_fb_report_panel_dead(struct msm_fb_data_type *mfd)
 /*
 + * mdss_prim_panel_fb_unblank() - Unblank primary panel FB
 + * @timeout : >0 blank primary panel FB after timeout (ms)
-+ 
++
 */
 int mdss_prim_panel_fb_unblank(int timeout)
 {
 	int ret = 0;
 	struct msm_fb_data_type *mfd = NULL;
-
+        printk("prim_fbi 00\n");
 	if (prim_fbi) {
+		printk("prim_fbi 01\n");
 		mfd = (struct msm_fb_data_type *)prim_fbi->par;
 		ret = wait_event_timeout(mfd->resume_wait_q,
 				!atomic_read(&mfd->resume_pending),
@@ -5362,27 +5398,31 @@ int mdss_prim_panel_fb_unblank(int timeout)
 			pr_info("Primary fb resume timeout\n");
 			return -ETIMEDOUT;
 		}
-
+		printk("prim_fbi 03\n");
 #ifdef CONFIG_FRAMEBUFFER_CONSOLE
+		printk("prim_fbi 04\n");
 		console_lock();
 #endif
 		if (!lock_fb_info(prim_fbi)) {
 #ifdef CONFIG_FRAMEBUFFER_CONSOLE
+		printk("prim_fbi 05\n");
 		console_unlock();
 #endif
 			return -ENODEV;
 		}
 		if (prim_fbi->blank == FB_BLANK_UNBLANK) {
-
+		printk("prim_fbi 06\n");
 		unlock_fb_info(prim_fbi);
 #ifdef CONFIG_FRAMEBUFFER_CONSOLE
+		printk("prim_fbi 07\n");
 		console_unlock();
 #endif
+		printk("prim_fbi 08\n");
 			return 0;
 		}
-
+		printk("prim_fbi 09\n");
 		wake_lock(&prim_panel_wakelock);
-
+		printk("fb_blank 01\n");
 		ret = fb_blank(prim_fbi, FB_BLANK_UNBLANK);
 		if (!ret) {
 			atomic_set(&prim_panel_is_on, true);
@@ -5394,10 +5434,14 @@ int mdss_prim_panel_fb_unblank(int timeout)
 			wake_unlock(&prim_panel_wakelock);
 		unlock_fb_info(prim_fbi);
 #ifdef CONFIG_FRAMEBUFFER_CONSOLE
+		printk("prim_fbi 10\n");
 		console_unlock();
 #endif
+		printk("return ret 01\n");
 		return ret;
 	}
+
+		printk("prim_fbi 11\n");
 	pr_err("primary panel is not existed\n");
 	return -EINVAL;
 }

@@ -224,6 +224,7 @@ struct reg_info {
 };
 
 struct smb_charger {
+	
 	struct device		*dev;
 	char			*name;
 	struct regmap		*regmap;
@@ -267,6 +268,12 @@ struct smb_charger {
 	struct smb_regulator	*vbus_vreg;
 	struct smb_regulator	*vconn_vreg;
 	struct regulator	*dpdm_reg;
+
+	/*for usb temp protect funtion*/
+	struct qpnp_vadc_chip	*vadc_dev;
+	bool				protect_temp_by_d_work;
+	struct delayed_work		protect_temp_work;
+	int                            gpio45;
 
 	/* votables */
 	struct votable		*dc_suspend_votable;
@@ -457,6 +464,8 @@ int smblib_set_prop_dc_current_max(struct smb_charger *chg,
 				const union power_supply_propval *val);
 
 int smblib_get_prop_usb_present(struct smb_charger *chg,
+				union power_supply_propval *val);
+int smblib_get_prop_usb_health(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_get_prop_usb_online(struct smb_charger *chg,
 				union power_supply_propval *val);

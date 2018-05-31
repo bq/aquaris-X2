@@ -27,7 +27,7 @@ extern void himax_ic_reset(uint8_t loadconfig,uint8_t int_off);
 #if defined(HX_AUTO_UPDATE_FW)
 	unsigned char i_CTPM_FW1[]=
 	{
-		#include "L8800_DJN_D08_C0D.i"
+		#include "L8800_DJN_D08_C0E.i"
 	};
 
 

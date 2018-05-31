@@ -71,9 +71,11 @@ static int mmc_decode_cid(struct mmc_card *card)
 
         char emmc0_id[] = "DD68MB";
 	char emmc1_id[] = "DH6DMB";
+	char emmc2_id[] = "3V6CMB";
 
 	char emmc0_name[] = "samsung KMDD60018M-B320 32+3";
 	char emmc1_name[] = "samsung KMDH6001DM-B422 64+4";
+	char emmc2_name[] = "samsung KM3V6001CM-B705 128+6";
 	char emmc_unknow[] = "unknow";
 
 	/*
@@ -105,6 +107,10 @@ static int mmc_decode_cid(struct mmc_card *card)
 		{
 			strcpy(card->cid.prod_version,emmc1_name);
 		}
+	else if(strcmp(card->cid.prod_name,emmc2_id)==0)
+		{
+			strcpy(card->cid.prod_version,emmc2_name);
+		}
 	else
 		{
 			strcpy(card->cid.prod_version,emmc_unknow);
@@ -135,6 +141,10 @@ static int mmc_decode_cid(struct mmc_card *card)
 	else if(strcmp(card->cid.prod_name,emmc1_id)==0)
 		{
 			strcpy(card->cid.prod_version,emmc1_name);
+		}
+	else if(strcmp(card->cid.prod_name,emmc2_id)==0)
+		{
+			strcpy(card->cid.prod_version,emmc2_name);
 		}
 	else
 		{

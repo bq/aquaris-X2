@@ -452,6 +452,7 @@ static int smblib_set_adapter_allowance(struct smb_charger *chg,
 }
 
 #define MICRO_5V	5000000
+#define MICRO_6V5	6500000
 #define MICRO_9V	9000000
 #define MICRO_12V	12000000
 static int smblib_set_usb_pd_allowed_voltage(struct smb_charger *chg,
@@ -2207,6 +2208,29 @@ int smblib_get_prop_usb_present(struct smb_charger *chg,
 	return 0;
 }
 
+int smblib_get_prop_usb_health(struct smb_charger *chg,
+				union power_supply_propval *val)
+{
+	int rc;
+	u8 stat;
+
+	rc = smblib_read(chg, USBIN_BASE + INT_RT_STS_OFFSET, &stat);
+	if (rc < 0) {
+		smblib_err(chg, "Couldn't read USBIN_RT_STS rc=%d\n", rc);
+		return rc;
+	}
+
+	if (stat & USBIN_OV_RT_STS_BIT) {
+		val->intval = POWER_SUPPLY_HEALTH_OVERVOLTAGE;
+	} else if (stat & USBIN_PLUGIN_RT_STS_BIT) {
+		val->intval = POWER_SUPPLY_HEALTH_GOOD;
+	} else {
+		val->intval = POWER_SUPPLY_HEALTH_UNKNOWN;
+	}
+
+	return 0;
+}
+
 int smblib_get_prop_usb_online(struct smb_charger *chg,
 			       union power_supply_propval *val)
 {
@@ -2237,6 +2261,11 @@ int smblib_get_prop_usb_voltage_max(struct smb_charger *chg,
 {
 	switch (chg->real_charger_type) {
 	case POWER_SUPPLY_TYPE_USB_HVDCP:
+		val->intval = MICRO_9V;
+		break;
+	case POWER_SUPPLY_TYPE_USB_HVDCP_3:
+		val->intval = MICRO_6V5;
+		break;
 	case POWER_SUPPLY_TYPE_USB_PD:
 		if (chg->smb_version == PM660_SUBTYPE)
 			val->intval = MICRO_9V;

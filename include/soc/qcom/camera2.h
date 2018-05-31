@@ -38,6 +38,7 @@ enum __camera_vendor_module_id{
 	MID_PRIMAX = 0x17,
 	MID_AVC,
 	MID_HOLITECH = 0x10,
+	MID_HOLITECH1 = 0x42,
 	MID_QUNHUI = 0x44,
 	MID_MAX
 };
