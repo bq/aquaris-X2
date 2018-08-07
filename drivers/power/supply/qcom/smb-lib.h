@@ -19,6 +19,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/extcon.h>
 #include "storm-watch.h"
+#include <linux/wakelock.h>
 
 enum print_reason {
 	PR_INTERRUPT	= BIT(0),
@@ -246,6 +247,7 @@ struct smb_charger {
 	struct mutex		ps_change_lock;
 	struct mutex		otg_oc_lock;
 	struct mutex		vconn_oc_lock;
+	struct wake_lock	protect_temp_wakelock;
 
 	/* power supplies */
 	struct power_supply		*batt_psy;

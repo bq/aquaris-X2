@@ -475,11 +475,18 @@ static irqreturn_t gf_irq(int irq, void *handle)
 #if defined(GF_NETLINK_ENABLE)
 	struct gf_dev *gf_dev = &gf;
 	char temp = GF_NET_EVENT_IRQ;
+	static int is_valid_irq = 0;
+	//printk(" andy f_irq\n");
 	wake_lock_timeout(&fp_wakelock, msecs_to_jiffies(WAKELOCK_HOLD_TIME));
 	sendnlmsg(&temp);
 	if ((gf_dev->wait_finger_down == true) && (gf_dev->device_available == 1) && (gf_dev->fb_black == 1)) {
-		gf_dev->wait_finger_down = false;
-		schedule_work(&gf_dev->work);
+		is_valid_irq += 1;
+		if(is_valid_irq > 1) {
+			is_valid_irq = 0;
+			gf_dev->wait_finger_down = false;
+			//printk(" andy wait_finger_down\n");
+			schedule_work(&gf_dev->work);
+		}
 	}
 #elif defined (GF_FASYNC)
 

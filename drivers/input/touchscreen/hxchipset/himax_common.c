@@ -27,13 +27,13 @@ extern void himax_ic_reset(uint8_t loadconfig,uint8_t int_off);
 #if defined(HX_AUTO_UPDATE_FW)
 	unsigned char i_CTPM_FW1[]=
 	{
-		#include "L8800_DJN_D08_C0F.i"
+		#include "L8800_DJN_D08_C10.i"
 	};
 
 
 	unsigned char i_CTPM_FW2[]=
 	{
-		#include "L8800_Truly_D05_C0D.i"
+		#include "L8800_Truly_D05_C0E.i"
 	};
 
 #endif
@@ -1436,7 +1436,7 @@ int himax_ts_work_status(struct himax_ts_data *ts)
 #endif
 
 #ifdef HX_SMART_WAKEUP
-    if (atomic_read(&ts->suspend_mode)&&(!FAKE_POWER_KEY_SEND)&&(ts->SMWP_enable)&&(!diag_cmd))
+    if (atomic_read(&ts->suspend_mode)&&(ts->SMWP_enable)&&(!diag_cmd))
     {
         result = HX_REPORT_SMWP_EVENT;
     }

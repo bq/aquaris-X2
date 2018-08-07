@@ -77,7 +77,7 @@
 		qcom,mdss-dsi-tx-eot-append;
 		qcom,mdss-dsi-post-init-delay = <1>;
 		qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
-		qcom,mdss-pan-physical-width-dimension = <64>;
+		qcom,mdss-pan-physical-width-dimension = <65>;
 		qcom,mdss-pan-physical-height-dimension = <128>;
 	};
 };

@@ -33,7 +33,7 @@
 #include <linux/qpnp/qpnp-adc.h>
 
 #define SMB2_DEFAULT_WPWR_UW	8000000
-#define PROTECT_TEMP_DELAY_MS    5000
+#define PROTECT_TEMP_DELAY_MS	2000
 
 static struct smb_params v1_params = {
 	.fcc			= {
@@ -206,30 +206,28 @@ void set_charging_protect(int enable)
 {
 	int value=0,gpio45=45;
 	value = gpio_get_value(gpio45);
-	printk("gpio45 default value is %d\n",value);
+	pr_debug("gpio45 previous value is %d\n",value);
 	gpio_direction_output(gpio45, enable);
 	value = gpio_get_value(gpio45);
-	printk("gpio45 set to output value = %d\n",value);
+	pr_debug("gpio45 set to output value = %d\n",value);
 }
 
 static int get_usb_temp_value(struct smb_charger *chg){
- 	int rc, on;
+	int rc, on;
 	struct qpnp_vadc_result results;
- 	chg->vadc_dev = qpnp_get_vadc(chg->dev, "usb_therm");
- 	if (IS_ERR(chg->vadc_dev)) {
- 		printk("vadc get error\n");
-	 rc = PTR_ERR(chg->vadc_dev);
- 	if (rc != -EPROBE_DEFER)
- 		printk("vadc prop missing rc=%d\n",rc);
- 	}
+	chg->vadc_dev = qpnp_get_vadc(chg->dev, "usb_therm");
+	if (IS_ERR(chg->vadc_dev)) {
+		pr_err("could not get vadc_dev\n");
+		rc = PTR_ERR(chg->vadc_dev);
+	}
 
-	on = qpnp_vadc_read(chg->vadc_dev, VADC_AMUX_THM4_PU2, &results);
+	rc = qpnp_vadc_read(chg->vadc_dev, VADC_AMUX_THM4_PU2, &results);
 	if (rc) {
- 		printk("Unable to read VADC_AMUX_THM4_PU2 rc=%d\n", rc);
- 	}
- 	on = (int)results.physical;
- 	printk("read VADC_AMUX_THM4_PU2 value=%d\n", on);
- 	return on; 
+		pr_err("Unable to read VADC_AMUX_THM4_PU2 rc=%d\n", rc);
+	}
+	on = (int)results.physical;
+	pr_debug("Read VADC_AMUX_THM4_PU2, value=%d\n", on);
+	return on; 
 }
 
 static int smb2_parse_dt(struct smb2 *chip)
@@ -407,20 +405,20 @@ static int smb2_usb_get_prop(struct power_supply *psy,
 			val->intval = 1;
 		else
 			rc = smblib_get_prop_usb_present(chg, val);
-
 		if(val->intval) {
 			if(chg->protect_temp_by_d_work && !is_delay_work_working) {
+				is_delay_work_working = true;
+				wake_lock(&chg->protect_temp_wakelock);
+				pr_info("Protection task enabled: bq_protect_temp_wakelock acquired\n");
 				schedule_delayed_work(&chg->protect_temp_work,
 					msecs_to_jiffies(PROTECT_TEMP_DELAY_MS));
-				is_delay_work_working = true;
 			}
 		}else{
-			if(chg->protect_temp_by_d_work && is_delay_work_working) {
+			if(chg->protect_temp_by_d_work && is_delay_work_working &&
+				gpio_get_value(45) == 0) {
 				cancel_delayed_work(&chg->protect_temp_work);
-
-				if(gpio_get_value(45) != 0)
-					set_charging_protect(0);
-				
+				wake_unlock(&chg->protect_temp_wakelock);
+				pr_info("Protection task disabled: bq_protect_temp_wakelock released\n");
 				is_delay_work_working = false;
 			}
 		} 
@@ -2292,25 +2290,32 @@ static void bq_protect_temp_work(struct work_struct *work)
 	struct smb_charger *chg = container_of(work,
 				struct smb_charger,
 				protect_temp_work.work);
-	
+	union power_supply_propval val;
 	int temp;
 	
 	temp = get_usb_temp_value(chg);
-	
 	if(temp >= 110) {
 		if(gpio_get_value(45) != 1) {
 			set_charging_protect(1);
-			pr_err("temp >= 110 gpio45 = %d\n",gpio_get_value(45));
+			pr_info("Trigger protection, temp (%d) >= 110\n", temp);
 		}
 	} else if(temp <= 60) {
 		if(gpio_get_value(45) != 0) {
 			set_charging_protect(0);
-			pr_err("temp <= 60 gpio45 = %d\n",gpio_get_value(45));
+			pr_info("Release protection, temp (%d) <= 60\n",temp);
 		}
 	}
-	
-	schedule_delayed_work(&chg->protect_temp_work,
+	smblib_get_prop_usb_present(chg, &val);
+
+	if (temp > 60 || val.intval) {
+		schedule_delayed_work(&chg->protect_temp_work,
 					msecs_to_jiffies(PROTECT_TEMP_DELAY_MS));
+	} else {
+		pr_info("Release protection, temp (%d) <= 60 or USB not present\n",temp);
+		pr_info("bq_protect_temp_wakelock released\n");
+		wake_unlock(&chg->protect_temp_wakelock);
+		is_delay_work_working = false;
+	}
 	return;
 }
 
@@ -2336,7 +2341,7 @@ static int smb2_probe(struct platform_device *pdev)
 	chg->mode = PARALLEL_MASTER;
 	chg->irq_info = smb2_irqs;
 	chg->name = "PMI";
-	
+
 	chg->regmap = dev_get_regmap(chg->dev->parent, NULL);
 	if (!chg->regmap) {
 		pr_err("parent regmap is missing\n");
@@ -2356,10 +2361,10 @@ static int smb2_probe(struct platform_device *pdev)
 		goto cleanup;
 	}
 
-       INIT_DELAYED_WORK(&chg->protect_temp_work, bq_protect_temp_work);
+	INIT_DELAYED_WORK(&chg->protect_temp_work, bq_protect_temp_work);
 	rc = gpio_request(chg->gpio45, "protect_temp_gpio");
 	if (rc) {
-		printk("%s: unable to request protect_temp gpio [%d]\n",
+		pr_err("%s: unable to request protect_temp gpio [%d]\n",
 				__func__,
 				chg->gpio45);
 	}
@@ -2488,6 +2493,8 @@ static int smb2_probe(struct platform_device *pdev)
 	}
 	batt_charge_type = val.intval;
 
+	wake_lock_init(&chg->protect_temp_wakelock, WAKE_LOCK_SUSPEND, "protect_temp_wakelock");
+
 	device_init_wakeup(chg->dev, true);
 
 	set_charging_protect(0);
@@ -2530,6 +2537,8 @@ static int smb2_remove(struct platform_device *pdev)
 	power_supply_unregister(chg->usb_port_psy);
 	regulator_unregister(chg->vconn_vreg->rdev);
 	regulator_unregister(chg->vbus_vreg->rdev);
+
+	wake_lock_destroy(&chg->protect_temp_wakelock);
 
 	platform_set_drvdata(pdev, NULL);
 	return 0;
