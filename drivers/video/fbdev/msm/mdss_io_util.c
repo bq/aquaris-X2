@@ -18,7 +18,11 @@
 #include <linux/mdss_io_util.h>
 
 #define MAX_I2C_CMDS  16
+
+#ifdef CONFIG_ZANGYA_CAMERA
 extern uint8_t HX_SMWP_EN;
+#endif 
+
 void dss_reg_w(struct dss_io_data *io, u32 offset, u32 value, u32 debug)
 {
 	u32 in_val;
@@ -250,6 +254,7 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 			}
 		}
 	} else {
+#ifdef CONFIG_ZANGYA_CAMERA
 		for (i = num_vreg-1; i >= 0; i--) {
 			if (HX_SMWP_EN == 1){
 				if((strcmp(in_vreg[i].vreg_name,"lab") == 0) || (strcmp(in_vreg[i].vreg_name,"ibb") == 0) || (strcmp(in_vreg[i].vreg_name,"wqhd-vddio") == 0)){
@@ -257,6 +262,7 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 					continue;
 				}
 			}
+
 			if (in_vreg[i].pre_off_sleep)
 				usleep_range(in_vreg[i].pre_off_sleep * 1000,
 					in_vreg[i].pre_off_sleep * 1000);
@@ -268,6 +274,7 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 					in_vreg[i].post_off_sleep * 1000);
 			pr_debug("Power_off Disable [%d]  %s\n",i,in_vreg[i].vreg_name);
 		}
+#endif
 	}
 	return rc;
 

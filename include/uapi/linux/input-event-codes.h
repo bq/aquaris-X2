@@ -616,6 +616,7 @@
 
 #define KEY_HALL_OPEN           0x284
 #define KEY_HALL_CLOSE          0x285
+#define KEY_FP_TAP		0x224
 
 #define BTN_TRIGGER_HAPPY		0x2c0
 #define BTN_TRIGGER_HAPPY1		0x2c0
