@@ -19,6 +19,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/extcon.h>
 #include "storm-watch.h"
+#include <linux/wakelock.h>
 
 enum print_reason {
 	PR_INTERRUPT	= BIT(0),
@@ -235,6 +236,7 @@ struct reg_info {
 };
 
 struct smb_charger {
+	
 	struct device		*dev;
 	char			*name;
 	struct regmap		*regmap;
@@ -255,6 +257,7 @@ struct smb_charger {
 	struct mutex		ps_change_lock;
 	struct mutex		otg_oc_lock;
 	struct mutex		vconn_oc_lock;
+	struct wake_lock	protect_temp_wakelock;
 
 	/* power supplies */
 	struct power_supply		*batt_psy;
@@ -276,6 +279,12 @@ struct smb_charger {
 	struct smb_regulator	*vbus_vreg;
 	struct smb_regulator	*vconn_vreg;
 	struct regulator	*dpdm_reg;
+
+	/*for usb temp protect funtion*/
+	struct qpnp_vadc_chip	*vadc_dev;
+	bool				protect_temp_by_d_work;
+	struct delayed_work		protect_temp_work;
+	int                            gpio45;
 
 	/* votables */
 	struct votable		*dc_suspend_votable;
@@ -306,6 +315,7 @@ struct smb_charger {
 	struct work_struct	vconn_oc_work;
 	struct delayed_work	otg_ss_done_work;
 	struct delayed_work	icl_change_work;
+	struct delayed_work	ov_chg_check_work;
 	struct delayed_work	pl_enable_work;
 	struct work_struct	legacy_detection_work;
 	struct delayed_work	uusb_otg_work;
@@ -348,6 +358,7 @@ struct smb_charger {
 	bool			use_extcon;
 	bool			otg_present;
 	bool			fcc_stepper_mode;
+	int			usb_voltage;
 
 	/* workaround flag */
 	u32			wa_flags;
@@ -454,6 +465,8 @@ int smblib_set_prop_dc_current_max(struct smb_charger *chg,
 
 int smblib_get_prop_usb_present(struct smb_charger *chg,
 				union power_supply_propval *val);
+int smblib_get_prop_usb_health(struct smb_charger *chg,
+							   union power_supply_propval *val);
 int smblib_get_prop_usb_online(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_get_prop_usb_suspend(struct smb_charger *chg,
@@ -462,6 +475,7 @@ int smblib_get_prop_usb_voltage_max(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_get_prop_usb_voltage_now(struct smb_charger *chg,
 				union power_supply_propval *val);
+int smblib_get_usb_voltage(struct smb_charger *chg);
 int smblib_get_prop_usb_current_now(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_get_prop_typec_cc_orientation(struct smb_charger *chg,

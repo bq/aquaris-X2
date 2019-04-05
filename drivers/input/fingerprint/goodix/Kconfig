@@ -1,0 +1,13 @@
+#
+# Input device configuration
+#
+
+menu "Fingerprint device support"
+
+config GOODIX_ZANGYA
+	tristate "Goodix fingerprint driver support"
+	default y
+	help
+	
+endmenu
+

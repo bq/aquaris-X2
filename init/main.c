@@ -493,10 +493,14 @@ static void __init mm_init(void)
 	kaiser_init();
 }
 
+int fpsensor = 1;
+int tpsensor = 2;
 asmlinkage __visible void __init start_kernel(void)
 {
 	char *command_line;
 	char *after_dashes;
+	char *p = NULL;
+	char *tp_p = NULL;
 
 	/*
 	 * Need to run as early as possible, to initialize the
@@ -534,6 +538,22 @@ asmlinkage __visible void __init start_kernel(void)
 	page_alloc_init();
 
 	pr_notice("Kernel command line: %s\n", boot_command_line);
+	p = NULL;
+	p = strstr(boot_command_line, "androidboot.fpsensor=fpc");
+	if (p) {
+		fpsensor = 1;//fpc fingerprint
+	} else {
+		fpsensor = 2;//goodix fingerprint
+	}
+
+	tp_p = NULL;
+	tp_p= strstr(boot_command_line,"androidboot.tpsensor=djn");
+	if(tp_p){
+		tpsensor = 1;//DJN new tp fw
+	}else{
+		tpsensor = 2;//DJN old tp fw
+	}
+
 	parse_early_param();
 	after_dashes = parse_args("Booting kernel",
 				  static_command_line, __start___param,

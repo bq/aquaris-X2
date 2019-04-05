@@ -1346,7 +1346,7 @@ static int _pwm_enable(struct qpnp_pwm_chip *chip)
 /* lpg_lock should be held while calling _pwm_change_mode() */
 static int _pwm_change_mode(struct qpnp_pwm_chip *chip, enum pm_pwm_mode mode)
 {
-	int rc;
+	int rc = 0;
 
 	if (mode == PM_PWM_MODE_LPG)
 		rc = qpnp_configure_lpg_control(chip);

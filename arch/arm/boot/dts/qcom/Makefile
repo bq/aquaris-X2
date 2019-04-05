@@ -188,7 +188,6 @@ dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sdm660-internal-codec-mtp.dtb \
 	sdm660-internal-codec-rcm.dtb \
 	sdm660-cdp.dtb \
-	sdm660-mtp.dtb \
 	sdm660-qrd.dtb \
 	sdm660-rcm.dtb \
 	sdm660-rumi.dtb \
@@ -235,7 +234,6 @@ dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sda658-pm660a-cdp.dtb \
 	sda658-pm660a-rcm.dtb \
 	sdm636-cdp.dtb \
-	sdm636-mtp.dtb \
 	sdm636-qrd.dtb \
 	sdm636-rcm.dtb \
 	sdm636-headset-jacktype-no-cdp.dtb \
@@ -260,11 +258,12 @@ dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sda636-pm660a-cdp.dtb \
 	sda636-pm660a-mtp.dtb \
 	sda636-pm660a-qrd-hdk.dtb \
-	sda636-pm660a-rcm.dtb
+	sda636-pm660a-rcm.dtb \
+	zangyapro.dtb \
+	zangya-sdm636.dtb
 
 dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \
 	sdm630-pm660a-rumi.dtb \
-	sdm630-mtp.dtb \
 	sdm630-usbc-audio-mtp.dtb \
 	sdm630-usbc-audio-rcm.dtb \
 	sdm630-cdp.dtb \
@@ -293,8 +292,9 @@ dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \
 	sdm455-mtp.dtb \
 	sdm455-qrd.dtb \
 	sdm455-cdp.dtb \
-	sdm455-rcm.dtb \
-	sdm455-internal-codec-rcm.dtb
+        sdm455-rcm.dtb \
+	sdm455-internal-codec-rcm.dtb \
+	zangya.dtb
 
 ifeq ($(CONFIG_ARM64),y)
 always          := $(dtb-y)

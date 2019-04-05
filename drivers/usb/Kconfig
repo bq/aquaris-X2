@@ -164,3 +164,14 @@ config USB_LED_TRIG
 	  gadget.
 
 endif # USB_SUPPORT
+
+config PTN36502
+	tristate "NXP PTN36502 driver"
+	default y
+	depends on I2C
+	help
+	  Say Y to include support
+	  for PTN36502 driver for batteries.
+	  This driver source code implemented
+	  all functions PTN36502.
+

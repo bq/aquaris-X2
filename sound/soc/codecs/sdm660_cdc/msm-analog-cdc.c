@@ -3992,7 +3992,7 @@ static void msm_anlg_cdc_configure_cap(struct snd_soc_codec *codec,
 				0x40, (MICBIAS_NO_EXT_BYP_CAP << 6));
 	} else if (micbias2) {
 		snd_soc_update_bits(codec, MSM89XX_PMIC_ANALOG_MICB_1_EN,
-				0x40, (pdata->micbias2_cap_mode << 6));
+				0x40, (1 << 6));
 	} else if (micbias1) {
 		snd_soc_update_bits(codec, MSM89XX_PMIC_ANALOG_MICB_1_EN,
 				0x40, (pdata->micbias1_cap_mode << 6));
