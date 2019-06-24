@@ -92,7 +92,7 @@ static ssize_t ant_state_show(struct class *class,
 }
 
 static struct class_attribute ant_state =
-	__ATTR(ant_state, S_IRUGO, ant_state_show, NULL);
+	__ATTR(ant_state, 0664, ant_state_show, NULL);
 
 static int ant_register_class_dev(struct ant_check_info *ant_info){
 	int err;

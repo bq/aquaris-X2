@@ -711,12 +711,12 @@ static int fpc1020_probe(struct platform_device *pdev)
 	 proc_entry = proc_create(PROC_NAME, 0777, NULL, &proc_file_fpc_ops);
     	 if (NULL == proc_entry)
              {
-                 printk(" gf3208 Couldn't create proc entry!");
+                 printk("fpc1020 Couldn't create proc entry!");
                  return -ENOMEM;
              }
              else
              {
-                 printk("gf3208 Create proc entry success!");
+                 printk("fpc1020 Create proc entry success!");
              }
 
 
@@ -767,10 +767,9 @@ static int __init fpc1020_init(void)
 {
 	int rc;
 	if(fpsensor != 1){
-                 pr_err("andy fpc1020_probe failed as fpsensor=%d(1=fp)\n", fpsensor);
+                 pr_err("fpc1020_probe failed as fpsensor=%d(1=fp)\n", fpsensor);
                  return -1;
          }
-	printk("andytest!!!!!!!!!!!!!");
 	rc = platform_driver_register(&fpc1020_driver);
 
         tyt_debug;

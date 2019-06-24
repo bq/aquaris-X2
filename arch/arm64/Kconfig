@@ -1228,6 +1228,14 @@ source "drivers/cpufreq/Kconfig"
 
 endmenu
 
+config ZANGYA_DTS
+        bool "Enable Support for the product zero6"
+        default n
+        help
+          This enables support for the product zero6.
+          If you do not wish to build a kernel that runs
+          on this chipset,say 'N' here.
+
 source "net/Kconfig"
 
 source "drivers/Kconfig"

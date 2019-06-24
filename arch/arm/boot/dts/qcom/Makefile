@@ -258,9 +258,11 @@ dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sda636-pm660a-cdp.dtb \
 	sda636-pm660a-mtp.dtb \
 	sda636-pm660a-qrd-hdk.dtb \
-	sda636-pm660a-rcm.dtb \
-	zangyapro.dtb \
-	zangya-sdm636.dtb
+	sda636-pm660a-rcm.dtb
+
+dtb-$(CONFIG_ZANGYA_DTS) += zangya.dtb \
+	zangya-sdm636.dtb \
+	zangyapro.dtb
 
 dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \
 	sdm630-pm660a-rumi.dtb \
@@ -293,8 +295,7 @@ dtb-$(CONFIG_ARCH_SDM630) += sdm630-rumi.dtb \
 	sdm455-qrd.dtb \
 	sdm455-cdp.dtb \
         sdm455-rcm.dtb \
-	sdm455-internal-codec-rcm.dtb \
-	zangya.dtb
+	sdm455-internal-codec-rcm.dtb
 
 ifeq ($(CONFIG_ARM64),y)
 always          := $(dtb-y)

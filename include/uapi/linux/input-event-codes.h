@@ -613,6 +613,7 @@
 
 #define KEY_HALL_OPEN           0x284
 #define KEY_HALL_CLOSE          0x285
+#define KEY_FP_TAP		0x224
 
 #define KEY_ANT_CONNECT         0x290
 #define KEY_ANT_UNCONNECT       0x291

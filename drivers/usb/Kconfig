@@ -167,7 +167,7 @@ endif # USB_SUPPORT
 
 config PTN36502
 	tristate "NXP PTN36502 driver"
-	default y
+	default n
 	depends on I2C
 	help
 	  Say Y to include support
