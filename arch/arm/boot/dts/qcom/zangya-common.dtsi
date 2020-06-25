@@ -1,0 +1,359 @@
+/* Copyright (c) 2019, The be project. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "dsi-panel-djn-hx83112a-1080p-video.dtsi"
+#include "dsi-panel-djn11-hx83112a-1080p-video.dtsi"
+#include "dsi-panel-truly-hx83112a-1080p-video.dtsi"
+#include "zangya-common-camera.dtsi"
+
+&wdog {
+	qcom,bark-time = <15000>;
+};
+
+&spmi_bus {
+	qcom,pm660@0 {
+		qcom,power-on@800 {
+			qcom,s3-debounce = <16>;           //16 seconds to trigger S3 reset
+			qcom,s3-src = "kpdpwr-and-resin";  //S3 trig by KPDPWR_ON+RESIN (resin = VOL-)
+			qcom,pon_1 {
+				qcom,support-reset = <1>;
+				qcom,s1-timer = <10256>;   //10256 ms to bark (S1)
+				qcom,s2-timer = <2000>;    //2000 ms from bark to trigger S2 reset
+				qcom,s2-type = <8>;        //dVdd Hard Reset
+			};
+		};
+	};
+};
+
+&dsi_hx83112a_djn_fhd_video {
+	qcom,mdss-dsi-panel-timings-phy-v2 = [24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1b 08 09 05 03 04 a0];
+	qcom,mdss-dsi-min-refresh-rate = <48>;
+	qcom,mdss-dsi-max-refresh-rate = <60>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_hx83112a_djn_fhd_video>;
+};
+
+&dsi_hx83112a_djn11_fhd_video {
+	qcom,mdss-dsi-panel-timings-phy-v2 = [24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1b 08 09 05 03 04 a0];
+	qcom,mdss-dsi-min-refresh-rate = <48>;
+	qcom,mdss-dsi-max-refresh-rate = <60>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_hx83112a_djn11_fhd_video>;
+};
+
+&dsi_hx83112a_truly_fhd_video {
+	qcom,mdss-dsi-panel-timings-phy-v2 = [24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1f 08 09 05 03 04 a0
+		24 1b 08 09 05 03 04 a0];
+	qcom,mdss-dsi-min-refresh-rate = <48>;
+	qcom,mdss-dsi-max-refresh-rate = <60>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <1>;
+	qcom,mdss-dsi-bl-max-level = <4095>;
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_hx83112a_truly_fhd_video>;
+};
+
+&mtp_batterydata {
+		/delete-node/ qcom,ascent_3450mah;
+		/delete-node/ qcom,itech_3000mah;
+		#include "zangya_zangyapro_batteryProfile_atl_2990mAh_Mar5th2018.dtsi"
+	};
+
+&i2c_2 {
+	status = "ok";
+	ptn36502@1a {
+		compatible = "nxp,ptn36502";
+		reg = <0x1a>;
+	};
+};
+
+&pm660_charger {
+	qcom,usb-icl-ua = <2700000>;
+	qcom,fcc-max-ua = <2200000>;
+	qcom,fv-max-uv = <4400000>;
+	qcom,auto-recharge-soc;
+	qcom,autoadjust-vfloat;
+	qcom,thermal-mitigation = <2200000 2100000 1800000 1400000 1000000 600000 0>;
+	qcom,float-option = <1>;
+	qcom,usb_therm-vadc = <&pm660_vadc>;
+	qcom,protect-temp-by-d-work;
+};
+
+&pm660_fg {
+	qcom,fg-cutoff-voltage = <3400>;
+	qcom,fg-empty-voltage = <3000>;
+	qcom,fg-chg-term-current = <150>;
+	qcom,fg-sys-term-current = <(-170)>;
+	qcom,fg-jeita-thresholds = <0 10 45 55>;
+	qcom,fg-recharge-soc-thr = <98>;
+	qcom,fg-auto-recharge-soc;
+	qcom,hold-soc-while-full;
+	qcom,linearize-soc;
+};
+
+&pm660_vadc{
+	chan@50 {
+		label = "usb_therm";
+		reg = <0x50>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+		qcom,vadc-thermal-node;
+	};
+ };
+
+&pm660l_wled {
+	qcom,led-strings-list = [00 01 02];
+	qcom,fs-curr-ua = <24000>;
+};
+
+
+&i2c_1{
+	status = "ok";
+	clock-frequency = <400000>;
+	himax@48 {
+		compatible = "himax,hxcommon";
+		reg = <0x48>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <67 0x2>;
+		pinctrl-names = "pmx_ts_active",
+								"pmx_ts_suspend",
+								"pmx_ts_release";
+		himax,panel-coords = <0 1080 0 2160>;
+		himax,display-coords = <0 1080 0 2160>;
+		himax,irq-gpio = <&tlmm 67 0x02>;
+		himax,rst-gpio = <&tlmm 66 0x00>;
+		report_type = <1>;
+	};
+};
+
+&soc {
+	qcom,qbt1000 {
+        	/delete-property/ qcom,ipc-gpio;
+	};
+
+	fpc1020 {
+		status = "ok";
+		compatible = "fpc,fpc1020";
+		interrupt-parent = <&tlmm>;
+		interrupts = <72 0x0>;
+		fpc,gpio_rst    = <&tlmm 20 0x0>;
+		fpc,gpio_irq    = <&tlmm 72 0x0>;
+		vcc_spi-supply  = <&pm660_l13>;
+		vdd_io-supply   = <&pm660_l13>;
+		vdd_ana-supply  = <&pm660_l13>;
+
+		pinctrl-names = "fpc1020_reset_reset",
+			"fpc1020_reset_active",
+			"fpc1020_irq_active";
+
+		pinctrl-0 = <&msm_gpio_20>;
+		pinctrl-1 = <&msm_gpio_20_output_high>;
+		pinctrl-2 = <&msm_gpio_72>;
+	};
+
+	hall_switch {
+
+		compatible = "hall-switch,och175";
+		pinctrl-names = "hall_active","hall_suspend";
+		pinctrl-0 = <&hall_int_active>;
+		pinctrl-1 = <&hall_int_suspend>;
+		vdd-io-supply= <&pm660_l8>;
+		interrupt-names = "hall_irq";
+		hall,irq-gpio = <&tlmm 70 0x0>;
+	};
+};
+
+&tlmm {
+	hall_int_pin{
+		hall_int_active:hall_int_active {
+			mux {
+				pins = "gpio70";
+				function = "gpio";
+			};
+			config{
+				pins = "gpio70";
+				drive-strength = <6>;
+				bias-pull-up;
+			};
+		};
+		hall_int_suspend: hall_int_suspend {
+			mux {
+				pins = "gpio70";
+				function = "gpio";
+			};
+			config{
+				pins = "gpio70";
+				drive-strength = <6>;
+				bias-pull-up;
+			};
+		};
+	};
+
+	msm_gpio_20:msm_gpio_20 {
+		mux{
+			pins="gpio20";
+			function= "gpio";
+		};
+		config {
+			pins= "gpio20";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+	};
+
+	msm_gpio_20_output_high:msm_gpio_20_output_high {
+		mux {
+			pins = "gpio20";
+			function = "gpio";
+		};
+		config{
+			pins = "gpio20";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+	};
+
+	msm_gpio_72:msm_gpio_72{
+		mux{
+			pins = "gpio72";
+			function = "gpio";
+		};
+		config{
+			pins = "gpio72";
+			drive-strength=<2>;
+			bias-pull-down;
+		};
+	};
+};
+
+&dsi_panel_pwr_supply {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "wqhd-vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1950000>;
+			qcom,supply-enable-load = <32000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-off-sleep = <5>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "lab";
+			qcom,supply-min-voltage = <4600000>;
+			qcom,supply-max-voltage = <6000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-pre-on-sleep = <1>;
+		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "ibb";
+			qcom,supply-min-voltage = <4600000>;
+			qcom,supply-max-voltage = <6000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-post-on-sleep = <10>;
+		};
+};
+
+&int_codec {
+	status = "okay";
+	/delete-property/ qcom,us-euro-gpios;
+    qcom,msm-micbias1-ext-cap;
+};
+
+&pm660_haptics {
+	qcom,vmax-mv = <1700>;
+	qcom,ilim-ma = <800>;
+	qcom,wave-shape = "sine";
+	qcom,wave-play-rate-us = <4255>;
+	qcom,sc-deb-cycles = <1>;
+	qcom,brake-pattern = [00 00 00 00];
+	qcom,play-mode = "buffer";
+
+	/delete-property/ qcom,pmic-misc;
+	/delete-property/ qcom,misc-clk-trim-error-reg;
+	/delete-property/ qcom,lra-high-z;
+	/delete-property/ qcom,lra-auto-res-mode;
+	/delete-property/ qcom,correct-lra-drive-freq;
+};
+
+&red_led {
+	qcom,start-idx = <0>;
+	qcom,idx-len = <6>;
+	qcom,duty-pcts =
+		[00 00 00 64 64 64];
+	qcom,use-blink;
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
+};
+
+&green_led {
+	qcom,start-idx = <7>;
+	qcom,idx-len = <6>;
+	qcom,duty-pcts =
+		[00 00 00 64 64 64];
+	qcom,use-blink;
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
+};
+
+&blue_led {
+	qcom,start-idx = <13>;
+	qcom,idx-len = <6>;
+	qcom,duty-pcts =
+		[00 00 00 64 64 64];
+	qcom,use-blink;
+	qcom,ramp-step-ms = <50>;
+	qcom,lut-flags = <27>;
+};
+
+&sdhc_2 {
+	cd-gpios = <&tlmm 54 0x0>;
+};

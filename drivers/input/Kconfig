@@ -200,6 +200,11 @@ config INPUT_KEYCOMBO
 	---help---
 	  Say Y here if you want to take action when some keys are pressed;
 
+config HALL
+	tristate "HALL Switch"
+	---help---
+	  Say Y here if you want to enable hall sensor;
+
 comment "Input Device Drivers"
 
 source "drivers/input/keyboard/Kconfig"
@@ -213,6 +218,8 @@ source "drivers/input/tablet/Kconfig"
 source "drivers/input/touchscreen/Kconfig"
 
 source "drivers/input/misc/Kconfig"
+
+source "drivers/input/fingerprint/Kconfig"
 
 source "drivers/input/sensors/bmi160/Kconfig"
 

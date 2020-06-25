@@ -1,0 +1,72 @@
+
+qcom,zangya_zangyapro_batteryProfile_atl_2990mAh_Mar5th2018 {
+	qcom, = <24>;
+	/* #zangya_zangyapro_batteryProfile_atl_2990mAh_Mar5th2018*/
+	qcom,max-voltage-uv = <4400000>;
+	qcom,fastchg-current-ma = <2200>;
+	qcom,nom-batt-capacity-mah = <2990>;
+	qcom,batt-id-kohm = <47>;
+	qcom,battery-beta = <3435>;
+	qcom,fg-cc-cv-threshold-mv = <4390>;
+	qcom,battery-type = "zangya_zangyapro_batteryProfile_atl_2990mAh_Mar5th2018";
+	qcom,checksum = <0x9099>;
+	qcom,gui-version = "PM660GUI - 0.0.0.45";
+	qcom,fg-profile-data = [
+		 B0 1F 6E 05
+		 A3 0A 1F 06
+		 DA 1C BF FB
+		 FE 0D 4C 0A
+		 87 18 EC 22
+		 90 45 CE 52
+		 7A 00 00 00
+		 12 00 00 00
+		 00 00 69 BA
+		 39 CD CA B3
+		 1F 00 08 00
+		 3E E3 A2 ED
+		 BE 05 81 01
+		 89 15 0E 02
+		 36 E4 C8 32
+		 24 06 09 20
+		 27 00 14 00
+		 3B 20 FD 04
+		 F7 0A C7 05
+		 CA 1C DD 02
+		 49 0C F5 0B
+		 98 18 A7 23
+		 25 44 D3 5A
+		 70 00 00 00
+		 0E 00 00 00
+		 00 00 70 D5
+		 2D B3 36 D2
+		 17 00 00 00
+		 1F EB A2 ED
+		 AA 06 43 F3
+		 34 ED CC 03
+		 D7 F5 A8 1B
+		 B3 33 CC FF
+		 07 10 00 00
+		 D4 0B 66 46
+		 17 00 40 00
+		 06 02 0A FA
+		 FF 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+		 00 00 00 00
+	];
+};

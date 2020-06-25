@@ -50,6 +50,9 @@
 #define DS2_ADM_COPP_TOPOLOGY_ID 0xFFFFFFFF
 #endif
 
+#define ADM_COPP_SPEAKER_MONO_PROTECT_TOPO 0x10314
+#define ADM_COPP_SPEAKER_MONO_PROTECT_TOPO_PROTECT 0x10028036
+
 struct adm_copp {
 
 	atomic_t id[AFE_MAX_PORTS][MAX_COPPS_PER_PORT];
@@ -2886,6 +2889,11 @@ int adm_open(int port_id, int path, int rate, int channel_mode, int topology,
 	pr_debug("%s:port %#x path:%d rate:%d mode:%d perf_mode:%d,topo_id %d\n",
 		 __func__, port_id, path, rate, channel_mode, perf_mode,
 		 topology);
+
+	if ((topology == ADM_COPP_SPEAKER_MONO_PROTECT_TOPO) || (topology == ADM_COPP_SPEAKER_MONO_PROTECT_TOPO_PROTECT)) {
+		bit_width = 24;
+		pr_debug("%s: SP topology 0x%x is used. \n",  __func__, topology);
+	}
 
 	port_id = q6audio_convert_virtual_to_portid(port_id);
 	port_idx = adm_validate_and_get_port_index(port_id);

@@ -1,0 +1,19 @@
+menu "Fingerprint device support"
+
+config INPUT_FINGERPRINT
+	bool "Fingerprint sensors"
+	default n
+	help
+	  Say Y here, and a list of supported fingerprint sensors will be displayed.
+	  This option doesn't affect the kernel.
+
+	  If unsure, say N.
+
+if INPUT_FINGERPRINT
+config FINGERPRINT_FPC1020
+	tristate "fpc1020 fingerprint driver support"
+	help
+	say y here to enable fpc1020 fingerprint driver support!
+
+endif
+endmenu

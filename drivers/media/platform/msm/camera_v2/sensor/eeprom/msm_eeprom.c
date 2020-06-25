@@ -25,6 +25,7 @@ DEFINE_MSM_MUTEX(msm_eeprom_mutex);
 #ifdef CONFIG_COMPAT
 static struct v4l2_file_operations msm_eeprom_v4l2_subdev_fops;
 #endif
+struct vendor_eeprom s_vendor_eeprom[CAMERA_VENDOR_EEPROM_COUNT_MAX];
 
 /**
   * msm_get_read_mem_size - Get the total size for allocation
@@ -659,7 +660,7 @@ static int msm_eeprom_config(struct msm_eeprom_ctrl_t *e_ctrl,
 		if (e_ctrl->userspace_probe == 0) {
 			pr_err("%s:%d Eeprom already probed at kernel boot",
 				__func__, __LINE__);
-			rc = -EINVAL;
+			rc = -EALREADY;
 			break;
 		}
 		if (e_ctrl->cal_data.num_data == 0) {
@@ -1521,7 +1522,7 @@ static int msm_eeprom_config32(struct msm_eeprom_ctrl_t *e_ctrl,
 		if (e_ctrl->userspace_probe == 0) {
 			pr_err("%s:%d Eeprom already probed at kernel boot",
 				__func__, __LINE__);
-			rc = -EINVAL;
+			rc = -EALREADY;
 			break;
 		}
 		if (e_ctrl->cal_data.num_data == 0) {
@@ -1578,6 +1579,178 @@ static long msm_eeprom_subdev_fops_ioctl32(struct file *file, unsigned int cmd,
 }
 
 #endif
+
+static camera_vendor_module_id s5k2l8_ofilm_ogp0858_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MODULE_INFO_OFFSET = 0x01;//please reference the otp spec.
+	uint8_t MID_FLAG_OFFSET = 0x00;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+	mid = buffer[MODULE_INFO_OFFSET];
+	flag = buffer[MID_FLAG_OFFSET];
+	CDBG("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_OFILM && flag==0x1) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+
+}
+
+static camera_vendor_module_id s5k2l8_holitech_8941_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MODULE_INFO_OFFSET = 0x01;//please reference the otp spec.
+	uint8_t MID_FLAG_OFFSET = 0x00;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+	mid = buffer[MODULE_INFO_OFFSET];
+	flag = buffer[MID_FLAG_OFFSET];
+	CDBG("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_HOLITECH1 && flag==0x1) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+
+}
+
+static camera_vendor_module_id s5k5e8_ofilm_oef0859_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MID_FLAG_OFFSET_GROUP1 = 0;
+	uint8_t MID_FLAG_OFFSET_GROUP2 = 29;
+	uint8_t MODULE_INFO_OFFSET_GROUP1 = 1;
+	uint8_t MODULE_INFO_OFFSET_GROUP2 = 30;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+	if ((flag = buffer[MID_FLAG_OFFSET_GROUP1]) == 0x01 ) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP1];
+	CDBG("%s use group1 mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	} else if ((flag = buffer[MID_FLAG_OFFSET_GROUP2]) == 0x01) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP2];
+	CDBG("%s use group2 mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	} else {
+		mid = MID_NULL;
+	}
+
+	CDBG("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_OFILM && flag==0x01) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+
+}
+
+static camera_vendor_module_id s5k5e8_holitech_8941_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MID_FLAG_OFFSET_GROUP1 = 0;
+	uint8_t MID_FLAG_OFFSET_GROUP2 = 29;
+	uint8_t MODULE_INFO_OFFSET_GROUP1 = 1;
+	uint8_t MODULE_INFO_OFFSET_GROUP2 = 30;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+	if ((flag = buffer[MID_FLAG_OFFSET_GROUP1]) == 0x01 ) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP1];
+	CDBG("%s use group1 mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	} else if ((flag = buffer[MID_FLAG_OFFSET_GROUP2]) == 0x01) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP2];
+	CDBG("%s use group2 mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	} else {
+		mid = MID_NULL;
+	}
+
+	CDBG("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_HOLITECH1 && flag==0x01) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+
+}
+
+static camera_vendor_module_id s5k4h7yx_holitech_elq8909m_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MODULE_INFO_OFFSET = 0x01;//please reference the otp spec.
+	uint8_t MID_FLAG_OFFSET = 0x00;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+#define INFORMATION_GROUP_OFFSET 9
+
+	if (buffer[0 + INFORMATION_GROUP_OFFSET] == 0x55) {
+
+	   mid = buffer[MODULE_INFO_OFFSET + 0 + INFORMATION_GROUP_OFFSET];
+	   flag = buffer[0 + INFORMATION_GROUP_OFFSET];
+	} else if (buffer[0] == 0x55) {
+
+	   mid = buffer[MODULE_INFO_OFFSET];
+	   flag = buffer[MID_FLAG_OFFSET];
+	} else {
+	   pr_err("holitech s5k4h7_eeprom MODULE ID error: %s:%d \n", __func__, __LINE__);
+	}
+
+	pr_err("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_HOLITECH) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+}
+
+static camera_vendor_module_id s5k4h7yx_ofilm_off0812_get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl)
+{
+	uint8_t MID_FLAG_OFFSET = 0x00;
+	uint8_t MODULE_INFO_OFFSET_GROUP1 = 1;
+	uint8_t MODULE_INFO_OFFSET_GROUP2 = 12;
+	uint8_t MODULE_INFO_OFFSET_GROUP3 = 23;
+	uint8_t mid=0;
+	uint8_t flag=0;
+	uint8_t *buffer = e_ctrl->cal_data.mapdata;
+	bool rc = false;
+
+	flag = buffer[MID_FLAG_OFFSET];
+
+	if ((flag & 0xC0) == 0x40){
+		mid = buffer[MODULE_INFO_OFFSET_GROUP1];
+	} else if ((flag & 0x30) == 0x10) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP2];
+	} else if ((flag & 0x0C) == 0x04) {
+		mid = buffer[MODULE_INFO_OFFSET_GROUP3];
+	} else {
+		mid = MID_NULL;
+	}
+
+	pr_err("%s mid=0x%x, flag=0x%x\n", __func__, mid, flag);
+	rc = (mid==MID_OFILM) ? true : false;
+	if (rc==false) mid = MID_NULL;
+	return mid;
+}
+
+static uint8_t get_otp_vendor_module_id(struct msm_eeprom_ctrl_t *e_ctrl, const char *eeprom_name)
+{
+	camera_vendor_module_id module_id=MID_NULL;
+	if (strcmp(eeprom_name, "s5k4h7yx_holitech_elq8909m") == 0) {
+		module_id = s5k4h7yx_holitech_elq8909m_get_otp_vendor_module_id(e_ctrl);
+	} else if (strcmp(eeprom_name, "s5k4h7yx_ofilm_off0812") == 0) {
+		module_id = s5k4h7yx_ofilm_off0812_get_otp_vendor_module_id(e_ctrl);
+	} else if (strcmp(eeprom_name, "s5k2l8_ofilm_ogp0858") == 0) {
+		module_id = s5k2l8_ofilm_ogp0858_get_otp_vendor_module_id(e_ctrl);
+	} else if (strcmp(eeprom_name, "s5k5e8_ofilm_oef0859") == 0) {
+		module_id = s5k5e8_ofilm_oef0859_get_otp_vendor_module_id(e_ctrl);
+	} else if (strcmp(eeprom_name, "s5k2l8_holitech_8941") == 0) {
+		module_id = s5k2l8_holitech_8941_get_otp_vendor_module_id(e_ctrl);
+	} else if (strcmp(eeprom_name, "s5k5e8_holitech_8941") == 0) {
+		module_id = s5k5e8_holitech_8941_get_otp_vendor_module_id(e_ctrl);
+	}
+	pr_err("%s eeprom_name=%s, module_id=%d\n",__func__,eeprom_name,module_id);
+	if (module_id>=MID_MAX) module_id = MID_NULL;
+
+	return ((uint8_t)module_id);
+}
 
 static int msm_eeprom_platform_probe(struct platform_device *pdev)
 {
@@ -1728,6 +1901,12 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 			CDBG("memory_data[%d] = 0x%X\n", j,
 				e_ctrl->cal_data.mapdata[j]);
 
+		if (eb_info->eeprom_name != NULL) {
+			s_vendor_eeprom[pdev->id].module_id = get_otp_vendor_module_id(e_ctrl, eb_info->eeprom_name);
+			strcpy(s_vendor_eeprom[pdev->id].eeprom_name, eb_info->eeprom_name);
+		} else {
+			strcpy(s_vendor_eeprom[pdev->id].eeprom_name, "NULL");
+		}
 		e_ctrl->is_supported |= msm_eeprom_match_crc(&e_ctrl->cal_data);
 
 		rc = msm_camera_power_down(power_info,

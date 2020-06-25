@@ -1231,6 +1231,14 @@ source "drivers/cpufreq/Kconfig"
 
 endmenu
 
+config ZANGYA_DTS
+        bool "Enable Support for the product zangya and zangyapro"
+        default n
+        help
+          This enables support for the product zangya and zangyapro.
+          If you do not wish to build a kernel that runs
+          on this chipset,say 'N' here.
+
 source "net/Kconfig"
 
 source "drivers/Kconfig"

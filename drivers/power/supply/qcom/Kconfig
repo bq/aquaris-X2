@@ -100,4 +100,9 @@ config QPNP_QNOVO
 	  module. It also allows userspace code to read diagnostics of voltage
 	  and current measured during certain phases of the pulses.
 
+
+config USB_TEMP_PROTECT
+	bool "To switch charging by usb temperature"
+	help
+	 Say Y here if we want to use this function
 endmenu

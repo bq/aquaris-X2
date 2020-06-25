@@ -24,6 +24,11 @@
 
 #define SENSOR_MAX_MOUNTANGLE (360)
 
+extern struct vendor_eeprom s_vendor_eeprom[CAMERA_VENDOR_EEPROM_COUNT_MAX];
+
+int32_t msm_sensor_init_device_name(void);
+void msm_sensor_set_module_info(struct msm_sensor_ctrl_t *s_ctrl);
+
 static struct v4l2_file_operations msm_sensor_v4l2_subdev_fops;
 static int32_t msm_sensor_driver_platform_probe(struct platform_device *pdev);
 
@@ -741,10 +746,77 @@ static int32_t msm_sensor_driver_is_special_support(
 	return rc;
 }
 
+
+
+/* static function definition */
+#define MODULE_INFO_LENTH 128
+static struct kobject *msm_sensor_device=NULL;
+static char module_info[MODULE_INFO_LENTH] = {0};
+
+void msm_sensor_set_module_info(struct msm_sensor_ctrl_t *s_ctrl)
+{
+
+		printk(" s_ctrl->sensordata->camera_type = %d\n", s_ctrl->sensordata->sensor_info->position);
+
+		switch (s_ctrl->sensordata->sensor_info->position) {
+			case BACK_CAMERA_B:
+				strcat(module_info, "back: ");
+				break;
+			case AUX_CAMERA_B:
+				strcat(module_info, "back_aux: ");
+				break;
+			case FRONT_CAMERA_B:
+				strcat(module_info, "front: ");
+				break;
+			default:
+				strcat(module_info, "unknown: ");
+				break;
+			}
+		strcat(module_info, s_ctrl->sensordata->sensor_name);
+		strcat(module_info, "\n");
+}
+
+static ssize_t msm_sensor_module_id_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	ssize_t rc = 0;
+
+	sprintf(buf, "%s\n", module_info);
+	rc = strlen(buf) + 1;
+
+	return rc;
+}
+
+static DEVICE_ATTR(sensor, 0444, msm_sensor_module_id_show, NULL);
+
+int32_t msm_sensor_init_device_name(void)
+{
+	int32_t rc = 0;
+	pr_err("%s %d\n", __func__,__LINE__);
+	if (msm_sensor_device != NULL) {
+		pr_err("Macle android_camera already created\n");
+		return 0;
+	}
+	msm_sensor_device = kobject_create_and_add("android_camera", NULL);
+	if (msm_sensor_device == NULL) {
+		printk("%s: subsystem_register failed\n", __func__);
+		rc = -ENOMEM;
+		return rc ;
+	}
+	rc = sysfs_create_file(msm_sensor_device, &dev_attr_sensor.attr);
+	if (rc) {
+		printk("%s: sysfs_create_file failed\n", __func__);
+		kobject_del(msm_sensor_device);
+	}
+
+	return 0 ;
+}
+
 /* static function definition */
 int32_t msm_sensor_driver_probe(void *setting,
 	struct msm_sensor_info_t *probed_info, char *entity_name)
 {
+	uint8_t i = 0;
 	int32_t                              rc = 0;
 	struct msm_sensor_ctrl_t            *s_ctrl = NULL;
 	struct msm_camera_cci_client        *cci_client = NULL;
@@ -848,6 +920,32 @@ int32_t msm_sensor_driver_probe(void *setting,
 		rc = -EINVAL;
 		goto free_slave_info;
 	}
+
+	    pr_err("%s camera eeprom_name=%s\n",__func__, slave_info->eeprom_name);//slave_info is from userspace
+	    pr_err("%s slave_info->sensor_name =%s\n",__func__, slave_info->sensor_name);//slave_info is from userspace
+
+	for (i=0; i<CAMERA_VENDOR_EEPROM_COUNT_MAX; i++) {
+	    pr_err("dtsi eeprom_name[%d]=%s, module_id=%d\n",i,s_vendor_eeprom[i].eeprom_name, s_vendor_eeprom[i].module_id);
+		if (strcmp(slave_info->eeprom_name,s_vendor_eeprom[i].eeprom_name) == 0) {
+			if (((strcmp(slave_info->sensor_name,"s5k4h7yx_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
+			|| ((strcmp(slave_info->sensor_name,"s5k4h7yx_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH))
+			|| ((strcmp(slave_info->sensor_name,"s5k2l8_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
+			|| ((strcmp(slave_info->sensor_name,"s5k5e8_ofilm_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_OFILM))
+			|| ((strcmp(slave_info->sensor_name,"s5k2l8_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH1))
+			|| ((strcmp(slave_info->sensor_name,"s5k5e8_holitech_zangya") == 0) && (s_vendor_eeprom[i].module_id == MID_HOLITECH1))
+			) {
+				pr_err("module found!probe continue!eeprom_name=%s\n", slave_info->eeprom_name);
+				break;
+			  }
+		}
+	}
+	if (i >= CAMERA_VENDOR_EEPROM_COUNT_MAX) {
+		pr_err("module not found!probe break!eeprom_name=%s sensor_name=%s\n", slave_info->eeprom_name,slave_info->sensor_name);
+		rc = -EFAULT;
+
+		goto free_slave_info;
+	}
+
 
 	/* Print slave info */
 	CDBG("camera id %d Slave addr 0x%X addr_type %d\n",
@@ -1093,6 +1191,8 @@ CSID_TG:
 	s_ctrl->sensordata->cam_slave_info = slave_info;
 
 	msm_sensor_fill_sensor_info(s_ctrl, probed_info, entity_name);
+	msm_sensor_init_device_name();
+	msm_sensor_set_module_info(s_ctrl);
 
 	/*
 	 * Set probe succeeded flag to 1 so that no other camera shall

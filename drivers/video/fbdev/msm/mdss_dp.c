@@ -52,7 +52,13 @@ struct mdss_dp_attention_node {
 	struct list_head list;
 };
 
-#define DEFAULT_VIDEO_RESOLUTION HDMI_VFRMT_640x480p60_4_3
+#define DEFAULT_VIDEO_RESOLUTION HDMI_VFRMT_1920x1080p60_16_9
+
+#ifdef CONFIG_PTN36502
+extern void set_ptn36502_safe_state_mode (void);
+extern void set_ptn36502_dp4lane_mode (int cc_orient_reversed);
+extern u8 is_ptn36502_safe_mode;
+#endif
 
 static int mdss_dp_host_init(struct mdss_panel_data *pdata);
 static int mdss_dp_host_deinit(struct mdss_dp_drv_pdata *dp);
@@ -836,6 +842,7 @@ static int mdss_dp_request_gpios(struct mdss_dp_drv_pdata *dp)
 			goto aux_en_gpio_err;
 		}
 	}
+#ifndef CONFIG_PTN36502
 	if (gpio_is_valid(dp->aux_sel_gpio)) {
 		rc = devm_gpio_request(dev, dp->aux_sel_gpio, "aux_sel");
 		if (rc) {
@@ -844,6 +851,7 @@ static int mdss_dp_request_gpios(struct mdss_dp_drv_pdata *dp)
 			goto aux_sel_gpio_err;
 		}
 	}
+#endif
 	if (gpio_is_valid(dp->usbplug_cc_gpio)) {
 		rc = devm_gpio_request(dev, dp->usbplug_cc_gpio,
 						"usbplug_cc");
@@ -869,9 +877,11 @@ hpd_gpio_err:
 usbplug_cc_gpio_err:
 	if (gpio_is_valid(dp->aux_sel_gpio))
 		gpio_free(dp->aux_sel_gpio);
+#ifndef CONFIG_PTN36502
 aux_sel_gpio_err:
 	if (gpio_is_valid(dp->aux_en_gpio))
 		gpio_free(dp->aux_en_gpio);
+#endif
 aux_en_gpio_err:
 	return rc;
 }
@@ -893,12 +903,14 @@ static int mdss_dp_config_gpios(struct mdss_dp_drv_pdata *dp, bool enable)
 			if (rc)
 				pr_err("unable to set dir for aux_en gpio\n");
 		}
+#ifndef CONFIG_PTN36502
 		if (gpio_is_valid(dp->aux_sel_gpio)) {
 			rc = gpio_direction_output(
 				dp->aux_sel_gpio, dp->aux_sel_gpio_output);
 			if (rc)
 				pr_err("unable to set dir for aux_sel gpio\n");
 		}
+#endif
 		if (gpio_is_valid(dp->usbplug_cc_gpio)) {
 			gpio_set_value(
 				dp->usbplug_cc_gpio, 0);
@@ -912,10 +924,12 @@ static int mdss_dp_config_gpios(struct mdss_dp_drv_pdata *dp, bool enable)
 			gpio_set_value((dp->aux_en_gpio), 0);
 			gpio_free(dp->aux_en_gpio);
 		}
+#ifndef CONFIG_PTN36502
 		if (gpio_is_valid(dp->aux_sel_gpio)) {
 			gpio_set_value((dp->aux_sel_gpio), 0);
 			gpio_free(dp->aux_sel_gpio);
 		}
+#endif
 		if (gpio_is_valid(dp->usbplug_cc_gpio)) {
 			gpio_set_value((dp->usbplug_cc_gpio), 0);
 			gpio_free(dp->usbplug_cc_gpio);
@@ -2023,6 +2037,12 @@ static int mdss_dp_host_init(struct mdss_panel_data *pdata)
 	pr_debug("orientation = %d, aux_sel_gpio_output = %d\n",
 			dp_drv->orientation, dp_drv->aux_sel_gpio_output);
 
+#ifdef CONFIG_PTN36502
+	set_ptn36502_dp4lane_mode(dp_drv->orientation);
+	mdelay(5);
+	pr_err("set_ptn36502_dp4lane_mode\n");
+#endif
+
 	mdss_dp_pinctrl_set_state(dp_drv, true);
 	mdss_dp_config_gpios(dp_drv, true);
 
@@ -2100,6 +2120,10 @@ static int mdss_dp_host_deinit(struct mdss_dp_drv_pdata *dp)
 
 	mdss_dp_regulator_ctrl(dp, false);
 	dp->dp_initialized = false;
+
+#ifdef CONFIG_PTN36502
+	set_ptn36502_safe_state_mode();
+#endif
 	pr_debug("Host deinitialized successfully\n");
 
 	return 0;
